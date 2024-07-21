@@ -1,9 +1,8 @@
 import express from "express";
-import Message from "./types/message";
 import { createHandler } from 'graphql-http/lib/use/express';
 import { buildSchema } from 'graphql';
 import { connect, collections} from "./services/databaseService";
-// import { ruruHTML } from 'ruru/server';
+import {getMessageServiceRootValue} from "./services/messageService";
 
 const schema = buildSchema(`
     input MessageInput {
@@ -19,6 +18,7 @@ const schema = buildSchema(`
 
     type Query {
         getMessages: [Message]
+        getMessage(id: ID): Message
     }
     
     type Mutation {
@@ -30,22 +30,7 @@ const app = express();
 const port = process.env.PORT || 4000;
 
 const rootValue = {
-    getMessages: async () : Promise<Message[]> => {
-        // noinspection TypeScriptValidateTypes
-        const messages = await collections.messages?.find<Message>({}).toArray() as Message[];
-        if (!messages) return [];
-        return messages.map(m => new Message(m.content, m.author, m._id));
-    },
-    createMessage: async ({ message: messageInput }: { message: Message }): Promise<Message | null> => {
-        const { content, author } = messageInput;
-        const message = new Message(content, author);
-        const result = await collections.messages?.insertOne(message);
-        if (!result) return null;
-        if (!(await result).acknowledged)
-            throw new Error('Insert failed');
-
-        return message;
-    }
+    ...getMessageServiceRootValue()
 };
 
 app.all(
@@ -55,14 +40,6 @@ app.all(
         rootValue
     }),
 )
-//
-// app.get(
-//     '/',
-//     (_req, res) => {
-//         res.type('html');
-//         res.end(ruruHTML({ endpoint: '/api'}))
-//     }
-// )
 
 connect()
     .then(() => {
