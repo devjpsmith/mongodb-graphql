@@ -1,4 +1,6 @@
-import {Message, MessageInput} from "../types/message";
+// noinspection TypeScriptValidateTypes
+
+import { Message, MessageInput } from "../types/message";
 import { collections } from "./databaseService";
 import { ObjectId} from "mongodb";
 
@@ -26,7 +28,7 @@ async function getMessage(id: string) : Promise<Message | null> {
     return null;
 }
 
-async function createMessage({ message: messageInput }: { message: MessageInput }): Promise<Message | null> {
+async function createMessage({ messageInput }: { messageInput: MessageInput }): Promise<Message | null> {
     const { content, author } = messageInput;
     const message = new Message(content, author);
     const result = await collections.messages?.insertOne(message);
@@ -37,6 +39,8 @@ async function createMessage({ message: messageInput }: { message: MessageInput 
     return message;
 }
 
-export function getMessageServiceRootValue() {
-    return { getMessage, getMessages, createMessage };
+export {
+    getMessage,
+    getMessages,
+    createMessage
 }

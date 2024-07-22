@@ -1,49 +1,35 @@
 import express from "express";
-import { createHandler } from 'graphql-http/lib/use/express';
-import { buildSchema } from 'graphql';
-import { connect, collections} from "./services/databaseService";
-import {getMessageServiceRootValue} from "./services/messageService";
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import http from 'http';
+import cors from 'cors';
+import { connect } from "./services/databaseService";
+import { schema } from "./schemas/schema";
 
-const schema = buildSchema(`
-    input MessageInput {
-        content: String
-        author: String
-    }
-
-    type Message {
-        _id: ID
-        content: String!
-        author: String!
-    }
-
-    type Query {
-        getMessages: [Message]
-        getMessage(id: ID): Message
-    }
-    
-    type Mutation {
-        createMessage(message: MessageInput): Message
-    }
-`);
-
+const port = 4000;
 const app = express();
-const port = process.env.PORT || 4000;
+const httpServer = http.createServer(app);
 
-const rootValue = {
-    ...getMessageServiceRootValue()
-};
-
-app.all(
-    '/api',
-    createHandler({
-        schema,
-        rootValue
-    }),
-)
-
-connect()
-    .then(() => {
-        console.log('Connected to MongoDB')
-        app.listen(port);
-        console.log('Listening at localhost on port', port);
+const server = new ApolloServer({
+    schema,
 });
+server.start()
+    .then(() => {
+        app.use(
+            '/api',
+            cors(),
+            express.json(),
+            expressMiddleware(server, {
+                context: async ({req}) => ({ /* token: req.headers.token */})
+            })
+        );
+
+        connect()
+            .then(() => {
+                console.log('Connected to MongoDB');
+                httpServer.listen(port);
+                // await new Promise<void>((resolve) => httpServer.listen(port));
+                console.log('Listening at localhost on port', port);
+            });
+    });
+
