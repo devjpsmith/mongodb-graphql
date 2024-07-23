@@ -1,0 +1,18 @@
+enum TimeZone {
+    Pacific
+    Mountain
+    Central
+    Eastern
+    Atlantic
+    Newfoundland
+}
+
+type Author {
+    name: String
+    timeZone: TimeZone
+}
+
+input AuthorInput {
+    name: String
+    timeZone: TimeZone
+}

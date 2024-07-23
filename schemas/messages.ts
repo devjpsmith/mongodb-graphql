@@ -11,7 +11,6 @@ const resolvers = {
     },
     Mutation: {
         createMessage(obj, args, context, info) {
-            console.log({args});
             return createMessage(args)
         }
     }

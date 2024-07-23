@@ -1,11 +1,15 @@
 import { ObjectId} from "mongodb";
+import { Author } from "./author";
 
 export class Message {
-    constructor(public content: string, public author: string, public _id?: ObjectId) {
+    public _id?: ObjectId;
+    public id?: ObjectId = this._id;
+
+    constructor(public content: string, public author: Author) {
     }
 }
 
 export type MessageInput = {
     content: string;
-    author: string;
+    author: Author;
 }

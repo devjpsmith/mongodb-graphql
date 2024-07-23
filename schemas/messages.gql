@@ -1,12 +1,12 @@
 input MessageInput {
     content: String
-    author: String
+    author: AuthorInput
 }
 
 type Message {
-    _id: ID
+    id: ID
     content: String
-    author: String
+    author: Author
 }
 
 type Query {
@@ -15,5 +15,5 @@ type Query {
 }
 
 type Mutation {
-    createMessage(messageInput: MessageInput): Message
+    createMessage(message: MessageInput): Message
 }
